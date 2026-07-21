@@ -1,0 +1,15 @@
+pandas==2.2.3
+selenium==4.31.0
+undetected-chromedriver==3.5.5
+openai==1.78.1
+matplotlib==3.10.1
+spacy==3.8.5
+pillow==11.2.1
+numpy==2.2.5
+requests==2.32.3
+deep-translator==1.11.4
+nltk==3.9.1
+openpyxl==3.1.5
+python-dotenv
+
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
