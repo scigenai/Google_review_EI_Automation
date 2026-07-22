@@ -458,7 +458,7 @@ def generate_negative_reviews_daily_image(data: Dict[str, Any],
     x0 = MARGIN_X
     y = MARGIN_TOP
 
-    title = "DAILY REPORT: NEGATIVE GOOGLE REVIEWS"
+    title = "EI DAILY REPORT: NEGATIVE GOOGLE REVIEWS"
     draw.text((x0, y), title, font=font_title, fill=TITLE_COLOR)
     y += title_height + 10
 
