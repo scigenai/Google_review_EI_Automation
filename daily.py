@@ -1129,7 +1129,7 @@ if no_negative_reviews == 0:
     # Opening line of the email
     opening_line = (
         "Hello team,<br>"
-        "Here is a summary of the negative Google reviews received in last 24 hours from all ENBD branches."
+        "Here is a summary of the negative Google reviews received in last 24 hours from all EI branches."
     )
     
     # Convert PNG to base64 string
@@ -1156,7 +1156,7 @@ if no_negative_reviews == 0:
     """
     # Create the email
     msg = EmailMessage()
-    msg["Subject"] = f"Branch Google Reviews - Negative Posts - {date_suffix}"
+    msg["Subject"] = f"EI Branch Google Reviews - Negative Posts - {date_suffix}"
     msg["From"] = sender_email
     msg["To"] = ", ".join(receiver_email)
     msg.set_content(response_text)  # Fallback plain text
