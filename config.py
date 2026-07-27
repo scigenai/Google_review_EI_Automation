@@ -111,6 +111,9 @@ list_of_links = {
 'EI - Fujairah - Fujairah Branch' : 'https://maps.app.goo.gl/4dmfmsJKQZSNcwK46',
 'EI - Ras Al Khaimah - Ras Al Khaimah Branch' : 'https://maps.app.goo.gl/5dm1nfKfmvGBXC7f8',
 'EI - Ajman - Ajman Kalifa Bin Zayed Branch' : 'https://maps.app.goo.gl/RABq6N9UqQjtJdTr6',
+'EI - Dubai - Healthcare City Home Finance Center' : 'https://maps.app.goo.gl/SAgC9wjGM9aQgBC39',
+'EI - Dubai - Nad Al Hamar Home Finance Center' : 'https://maps.app.goo.gl/NmFUcVWxdiBVEAdj9',
+'EI - Sharjah - Qasimiyah Home Finance Center' : 'https://maps.app.goo.gl/8CfTRudKA8PhxHd67',
 # 35 EI
 
 'ADIB - Abu Dhabi  - Najda' : 'https://maps.app.goo.gl/GTNixCvAfwnxgdfT9', #No reviews in the last month
