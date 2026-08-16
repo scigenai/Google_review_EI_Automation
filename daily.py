@@ -619,7 +619,7 @@ def create_driver():
     
     options.add_argument("--disable-gpu")
     options.add_experimental_option('prefs', {'intl.accept_languages': 'en,en_US'})
-    driver = uc.Chrome(options=options,version_main=149)
+    driver = uc.Chrome(options=options,version_main=151)
     print("[SETUP] Chrome launched successfully.\n")
     return driver
 
