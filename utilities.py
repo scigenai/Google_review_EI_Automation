@@ -3,7 +3,12 @@
 from datetime import datetime, timedelta
 # from googletrans import Translator
 # translator = Translator()
+import json
+import random
+import time
+from pathlib import Path
 from deep_translator import GoogleTranslator
+from deep_translator.exceptions import TooManyRequests
 from nltk.util import ngrams
 
 import spacy
@@ -127,9 +132,103 @@ def avg_score_6mon(df):
 #         print(f"Translation failed for: {text}\nError: {e}")
 #         return text  # Return original text if translation fails
 
-def translate_to_english(text):
-    try:
-        return GoogleTranslator(source='auto', target='en').translate(text)
-    except Exception as e:
-        return f"Translation failed: {e}"
+# ---------------------------------------------------------------------------
+# Persistent translation cache (survives across days/runs, not just one run)
+# ---------------------------------------------------------------------------
+_CACHE_PATH = Path("translation_cache.json")
 
+def _load_cache():
+    if _CACHE_PATH.exists():
+        try:
+            with open(_CACHE_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"  [WARN] Could not read translation cache, starting fresh: {e}")
+    return {}
+
+def _save_cache(cache):
+    try:
+        with open(_CACHE_PATH, "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"  [WARN] Could not save translation cache: {e}")
+
+_translation_cache = _load_cache()
+_endpoint_blocked = False  # once True, stop calling the endpoint for the rest of this run
+
+def translate_to_english(text, max_retries=2, base_delay=3.0):
+    """
+    Translate text to English via deep_translator's free GoogleTranslator --
+    the same unauthenticated web endpoint translate.google.com's own site
+    uses internally. No API key, no published quota, no SLA: it isn't meant
+    for bulk/programmatic use, which is why it kept failing here. Google's
+    abuse detection tracks request volume+pattern per source IP; cross an
+    undocumented threshold and it blocks that IP -- not for a second, but for
+    an extended, variable cooldown (often 30 minutes to several hours). The
+    "5 requests/second" figure deep_translator reports in its error message
+    is just its own rough documentation of observed behavior, not a real
+    contract Google publishes. Repeated test runs of this script during
+    debugging, each firing an unthrottled burst of calls, is exactly the
+    pattern that triggers (and can re-trigger/extend) that block.
+
+    This hardens the free-endpoint approach without switching providers:
+      - a translation cache persisted to disk (translation_cache.json) so
+        repeated boilerplate text is never re-requested, even across days,
+      - a much more conservative delay between calls (3s + jitter, not the
+        documented-but-unreliable 5/sec) to avoid tripping a fresh block,
+      - once a TooManyRequests is seen, this run stops calling the endpoint
+        entirely and falls back to original text for everything remaining,
+        rather than retry-storming an endpoint that's already blocking you
+        (which risks extending the block further),
+      - never overwrites review text with an error string -- always falls
+        back to the original text on any failure.
+
+    Important: this reduces how often you trigger a block, it does not
+    remove the underlying risk -- you're still riding an unofficial,
+    undocumented, IP-throttled endpoint. If it keeps blocking you at your
+    actual daily volume, the only way to eliminate that risk entirely is
+    Google's *official* Cloud Translation API (a real, authenticated,
+    paid product -- 500,000 characters/month free, then paid -- via the
+    `google-cloud-translate` package), since that's a genuinely different,
+    quota-based service rather than a scraped free page.
+    """
+    global _endpoint_blocked
+
+    if not text or not str(text).strip():
+        return text
+
+    text = str(text)
+    if text in _translation_cache:
+        return _translation_cache[text]
+
+    if _endpoint_blocked:
+        # Already hit a block earlier in this run -- don't keep hammering it.
+        return text
+
+    for attempt in range(max_retries):
+        try:
+            result = GoogleTranslator(source='auto', target='en').translate(text)
+            result = result if result else text
+            _translation_cache[text] = result
+            _save_cache(_translation_cache)
+            time.sleep(base_delay + random.uniform(0, 1.0))
+            return result
+        except TooManyRequests:
+            if attempt < max_retries - 1:
+                wait = base_delay * (2 ** (attempt + 1))
+                print(f"  [WARN] Translation rate-limited, retrying in {wait:.1f}s...")
+                time.sleep(wait)
+            else:
+                print("  [WARN] Translation endpoint appears blocked for this run; "
+                      "keeping original text for all remaining reviews rather than "
+                      "keep hammering a blocked endpoint.")
+                _endpoint_blocked = True
+                _translation_cache[text] = text
+                return text
+        except Exception as e:
+            print(f"  [WARN] Translation failed, keeping original text: {e}")
+            _translation_cache[text] = text
+            return text
+
+    _translation_cache[text] = text
+    return text
