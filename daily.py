@@ -71,7 +71,7 @@ REVIEWS_LIMIT_PER_BRANCH = 200
 BRANCH_PREFIX = os.getenv("BRANCH_PREFIX", "EI")
 
 # How many days back to report on (1 = yesterday, UAE time)
-DAYS_BACK = 1
+DAYS_BACK = 3
 
 # ----------------------------------
 # HELPER FUNCTIONS
