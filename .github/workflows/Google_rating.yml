@@ -62,6 +62,8 @@ jobs:
           SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
           RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}
           APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           # The actual installed Chrome's major version, read above --
           # daily.py's create_driver() tries this first before falling
           # back to auto-detection / version probing.
