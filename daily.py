@@ -581,6 +581,21 @@ def resolve_short_url(url):
         return url
 
 
+def _run_field(run, *names):
+    """Read a field from an Apify run, whether it is a dict (old client) or an object (new client)."""
+    if run is None:
+        return None
+    for name in names:
+        if isinstance(run, dict):
+            if name in run:
+                return run[name]
+        else:
+            value = getattr(run, name, None)
+            if value is not None:
+                return value
+    return None
+
+
 def fetch_branch_reviews(branch_key, url):
     """
     Run the Apify actor for ONE branch and return the raw items.
@@ -605,9 +620,12 @@ def fetch_branch_reviews(branch_key, url):
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
             run = apify_client.actor(ACTOR_ID).call(run_input=run_input)
-            status = run.get("status") if run else None
+            # apify-client v3 returns an object, v1/v2 returned a dict -- support both
+            status = _run_field(run, "status")
+            status = getattr(status, "value", status)   # enum -> "SUCCEEDED"
             if status == "SUCCEEDED":
-                items = list(apify_client.dataset(run["defaultDatasetId"]).iterate_items())
+                dataset_id = _run_field(run, "default_dataset_id", "defaultDatasetId")
+                items = list(apify_client.dataset(dataset_id).iterate_items())
                 print(f"  [APIFY] Attempt {attempt}: status={status}, raw reviews={len(items)}")
                 return items
             last_error = f"status={status}"
