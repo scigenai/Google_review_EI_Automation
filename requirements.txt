@@ -1,16 +1,34 @@
+# ---- Data handling and Excel ----
 pandas==2.2.3
+numpy==2.2.5
+openpyxl==3.1.5
+
+# ---- Scraping ----
 selenium==4.31.0
 undetected-chromedriver==3.5.5
-openai==1.78.1
-matplotlib==3.10.1
-spacy==3.8.5
-pillow==11.2.1
-numpy==2.2.5
 requests==2.32.3
+apify-client
+
+# ---- AI / translation ----
+openai==1.78.1
+google-genai
 deep-translator==1.11.4
-nltk==3.9.1
-openpyxl==3.1.5
-python-dotenv
 argostranslate
 langdetect
+
+# ---- NLP ----
+# spaCy is pinned so it matches the en_core_web_sm model wheel below
+spacy==3.8.5
+nltk==3.9.1
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+
+# ---- Image generation / plotting ----
+pillow==11.2.1
+matplotlib==3.10.1
+
+# ---- Config / environment ----
+python-dotenv
+
+# ---- Time zones (needed on Windows for ZoneInfo("Asia/Dubai")) ----
+tzdata
+
